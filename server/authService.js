@@ -52,17 +52,4 @@ router.post('/login', async (req, res) => {
         res.status(500).send('Ошибка авторизации');
     }
 });
-
-// Получение профиля пользователя
-router.get('/profile', verifyToken, async (req, res) => {
-    try {
-        const user = await User.findById(req.userId).select('-password'); // Выборка данных пользователя, исключая пароль
-        if (!user) return res.status(404).send('Пользователь не найден');
-        res.json(user);
-    } catch (error) {
-        console.error("Ошибка в /api/auth/profile:", error.message);
-        res.status(500).send('Ошибка получения данных профиля');
-    }
-});
-
 module.exports = router; // Убедитесь, что вы правильно экспортируете router
