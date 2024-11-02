@@ -9,14 +9,23 @@ const secretKey = 'yourSecretKey'; // Лучше вынести в .env
 // Middleware для проверки токена
 const verifyToken = (req, res, next) => {
     const token = req.headers['authorization'];
-    if (!token) return res.status(403).send('Токен отсутствует');
+    console.log('Получен токен:', token); // Логируем полученный токен
+    if (!token) {
+        console.log('Токен отсутствует');
+        return res.status(403).send('Токен отсутствует');
+    }
 
     jwt.verify(token.split(' ')[1], secretKey, (err, decoded) => {
-        if (err) return res.status(401).send('Ошибка аутентификации');
+        if (err) {
+            console.log('Ошибка при верификации токена:', err.message); // Логируем ошибку
+            return res.status(401).send('Ошибка аутентификации');
+        }
+        console.log('Токен успешно проверен, данные пользователя:', decoded); // Логируем данные пользователя из токена
         req.userId = decoded.id;
         next();
     });
 };
+
 
 // Регистрация
 router.post('/register', async (req, res) => {
@@ -52,4 +61,24 @@ router.post('/login', async (req, res) => {
         res.status(500).send('Ошибка авторизации');
     }
 });
+
+router.get('/profile', verifyToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.userId);
+        if (!user) {
+            console.log('Пользователь не найден:', req.userId); // Логируем, если пользователь не найден
+            return res.status(404).send('Пользователь не найден');
+        }
+        res.json({
+            firstName: user.firstName,
+            lastName: user.lastName,
+            birthDate: user.birthDate,
+            username: user.username,
+        });
+    } catch (error) {
+        console.error('Ошибка при получении профиля:', error.message); // Логируем ошибки
+        res.status(500).send('Ошибка получения профиля');
+    }
+});
+
 module.exports = router; // Убедитесь, что вы правильно экспортируете router
