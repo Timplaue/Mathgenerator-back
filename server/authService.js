@@ -3,8 +3,21 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('./models/User');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
 
 const secretKey = 'yourSecretKey';
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ storage });
 
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -73,6 +86,17 @@ router.get('/profile', verifyToken, async (req, res) => {
         });
     } catch (error) {
         res.status(500).send('Ошибка при получении профиля');
+    }
+});
+// Обработчик загрузки аватара
+router.post('/upload-avatar', verifyToken, upload.single('avatar'), async (req, res) => {
+    try {
+        const avatarUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+        await User.findByIdAndUpdate(req.userId, { avatarUrl });
+        res.json({ avatarUrl });
+    } catch (error) {
+        console.error("Ошибка загрузки аватара:", error);
+        res.status(500).send('Ошибка загрузки аватара');
     }
 });
 

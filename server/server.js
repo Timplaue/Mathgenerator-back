@@ -1,8 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const authRouter = require('./authService'); // Импортируем маршруты аутентификации
+const authRouter = require('./authService');
 const mathService = require('./mathService');
+const path = require('path'); // Импортируем path для работы с путями
 const app = express();
 const PORT = 5000;
 
@@ -13,6 +14,9 @@ mongoose.connect('mongodb://localhost:27017/math-generator', {
 
 app.use(cors());
 app.use(express.json());
+
+// Настройка раздачи статических файлов
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Подключаем маршруты аутентификации
 app.use('/api/auth', authRouter);
