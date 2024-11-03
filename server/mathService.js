@@ -30,7 +30,28 @@ router.get('/generate', (req, res) => {
     const operationList = operations.split(',');
     const numCount = Math.max(2, parseInt(count, 10));
 
-    let numbers = Array.from({ length: numCount }, () => Math.floor(Math.random() * 100) - 50);
+    let min, max;
+
+    // Определяем диапазоны в зависимости от сложности
+    switch (difficulty) {
+        case 'easy':
+            min = 0;
+            max = 9;
+            break;
+        case 'normal':
+            min = 0;
+            max = 99;
+            break;
+        case 'hard':
+            min = 10;
+            max = 999;
+            break;
+        default:
+            return res.status(400).json({ error: 'Неверная сложность' });
+    }
+
+    // Генерируем случайные числа в указанном диапазоне
+    let numbers = Array.from({ length: numCount }, () => Math.floor(Math.random() * (max - min + 1)) + min);
 
     const result = generateExample(numbers, operationList);
     res.json({ example: result.example, answer: result.answer });
