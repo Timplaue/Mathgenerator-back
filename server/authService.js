@@ -88,6 +88,7 @@ router.get('/profile', verifyToken, async (req, res) => {
                 perfectScores: user.perfectScores,
             },
             avatarUrl: user.avatarUrl,
+            registrationDate: user.registrationDate,
         });
     } catch (error) {
         res.status(500).send('Ошибка при получении профиля');

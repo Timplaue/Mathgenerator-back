@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema({
     examplesSolved: { type: Number, default: 0 },
     levelsCompleted: { type: Number, default: 0 },
     perfectScores: { type: Number, default: 0 },
+    registrationDate: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model('User', userSchema);
