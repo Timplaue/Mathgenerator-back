@@ -4,30 +4,27 @@ const jwt = require('jsonwebtoken');
 const User = require('./models/User');
 const router = express.Router();
 
-const secretKey = 'yourSecretKey'; // Лучше вынести в .env
+const secretKey = 'yourSecretKey';
 
-// Middleware для проверки токена
 const verifyToken = (req, res, next) => {
-    const token = req.headers['authorization'];
-    console.log('Получен токен:', token); // Логируем полученный токен
-    if (!token) {
+    const authHeader = req.headers['authorization'];
+    console.log('Заголовок Authorization:', authHeader);
+    if (!authHeader) {
         console.log('Токен отсутствует');
         return res.status(403).send('Токен отсутствует');
     }
 
-    jwt.verify(token.split(' ')[1], secretKey, (err, decoded) => {
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, secretKey, (err, decoded) => {
         if (err) {
-            console.log('Ошибка при верификации токена:', err.message); // Логируем ошибку
+            console.log('Ошибка при верификации токена:', err.message);
             return res.status(401).send('Ошибка аутентификации');
         }
-        console.log('Токен успешно проверен, данные пользователя:', decoded); // Логируем данные пользователя из токена
         req.userId = decoded.id;
         next();
     });
 };
 
-
-// Регистрация
 router.post('/register', async (req, res) => {
     const { firstName, lastName, birthDate, username, password } = req.body;
 
@@ -45,7 +42,6 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Логин
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
     try {
@@ -66,7 +62,7 @@ router.get('/profile', verifyToken, async (req, res) => {
     try {
         const user = await User.findById(req.userId);
         if (!user) {
-            console.log('Пользователь не найден:', req.userId); // Логируем, если пользователь не найден
+            console.log('Пользователь не найден:', req.userId);
             return res.status(404).send('Пользователь не найден');
         }
         res.json({
@@ -76,9 +72,8 @@ router.get('/profile', verifyToken, async (req, res) => {
             username: user.username,
         });
     } catch (error) {
-        console.error('Ошибка при получении профиля:', error.message); // Логируем ошибки
-        res.status(500).send('Ошибка получения профиля');
+        res.status(500).send('Ошибка при получении профиля');
     }
 });
 
-module.exports = router; // Убедитесь, что вы правильно экспортируете router
+module.exports = router;
