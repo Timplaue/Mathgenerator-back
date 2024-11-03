@@ -75,7 +75,6 @@ router.get('/profile', verifyToken, async (req, res) => {
     try {
         const user = await User.findById(req.userId);
         if (!user) {
-            console.log('Пользователь не найден:', req.userId);
             return res.status(404).send('Пользователь не найден');
         }
         res.json({
@@ -83,6 +82,12 @@ router.get('/profile', verifyToken, async (req, res) => {
             lastName: user.lastName,
             birthDate: user.birthDate,
             username: user.username,
+            statistics: {
+                examplesSolved: user.examplesSolved,
+                levelsCompleted: user.levelsCompleted,
+                perfectScores: user.perfectScores,
+            },
+            avatarUrl: user.avatarUrl,
         });
     } catch (error) {
         res.status(500).send('Ошибка при получении профиля');
@@ -97,6 +102,25 @@ router.post('/upload-avatar', verifyToken, upload.single('avatar'), async (req, 
     } catch (error) {
         console.error("Ошибка загрузки аватара:", error);
         res.status(500).send('Ошибка загрузки аватара');
+    }
+});
+
+router.post('/update-statistics', verifyToken, async (req, res) => {
+    const { examplesSolved, levelsCompleted, perfectScores } = req.body;
+
+    try {
+        const user = await User.findById(req.userId);
+        if (!user) return res.status(404).send('Пользователь не найден');
+
+        user.examplesSolved += examplesSolved || 0;
+        user.levelsCompleted += levelsCompleted || 0;
+        user.perfectScores += perfectScores || 0;
+
+        await user.save();
+        res.json({ message: 'Статистика обновлена' });
+    } catch (error) {
+        console.error("Ошибка при обновлении статистики:", error);
+        res.status(500).send('Ошибка обновления статистики');
     }
 });
 
