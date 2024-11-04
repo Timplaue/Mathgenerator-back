@@ -1,27 +1,34 @@
 const express = require('express');
 const router = express.Router();
 
-// Генерация примера с произвольным количеством чисел
+// Генерация примера с целочисленным делением
 const generateExample = (numbers, operations) => {
-    let example = '';
+    let example = `${numbers[0]}`;
     let answer = numbers[0];
 
     for (let i = 1; i < numbers.length; i++) {
-        const operation = operations[Math.floor(Math.random() * operations.length)];
-        const formattedNum = numbers[i] < 0 ? `(${numbers[i]})` : numbers[i];
+        let operation = operations[Math.floor(Math.random() * operations.length)];
+        let currentNum = numbers[i];
 
-        example += `${operation} ${formattedNum} `;
-
-        switch (operation) {
-            case '+': answer += numbers[i]; break;
-            case '-': answer -= numbers[i]; break;
-            case '*': answer *= numbers[i]; break;
-            case '/': answer = answer % numbers[i] === 0 ? answer / numbers[i] : answer; break;
-            default: break;
+        if (operation === '/') {
+            // Проверяем делимость нацело, если не делится, находим подходящее число
+            while (answer % currentNum !== 0 || currentNum === 0) {
+                currentNum = Math.floor(Math.random() * 9) + 1; // подбираем число от 1 до 9
+            }
+            answer = answer / currentNum;
+        } else if (operation === '*') {
+            answer *= currentNum;
+        } else if (operation === '+') {
+            answer += currentNum;
+        } else if (operation === '-') {
+            answer -= currentNum;
         }
+
+        // Формируем строку примера с правильным порядком операций
+        example += ` ${operation} ${currentNum}`;
     }
 
-    return { example: `${numbers[0]} ${example.trim()}`, answer };
+    return { example, answer };
 };
 
 // Маршрут генерации примеров
@@ -32,27 +39,24 @@ router.get('/generate', (req, res) => {
 
     let min, max;
 
-    // Определяем диапазоны в зависимости от сложности
     switch (difficulty) {
         case 'easy':
-            min = 0;
+            min = 1;
             max = 9;
             break;
         case 'normal':
-            min = 0;
+            min = 1;
             max = 99;
             break;
         case 'hard':
             min = 10;
-            max = 999;
+            max = 99;
             break;
         default:
             return res.status(400).json({ error: 'Неверная сложность' });
     }
 
-    // Генерируем случайные числа в указанном диапазоне
     let numbers = Array.from({ length: numCount }, () => Math.floor(Math.random() * (max - min + 1)) + min);
-
     const result = generateExample(numbers, operationList);
     res.json({ example: result.example, answer: result.answer });
 });
