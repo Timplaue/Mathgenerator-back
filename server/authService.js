@@ -133,8 +133,6 @@ router.post('/update-statistics', verifyToken, async (req, res) => {
             return res.status(404).json({ message: 'Пользователь не найден' });
         }
 
-        // Логируем текущие значения перед обновлением
-        console.log("Текущая статистика пользователя перед обновлением:", user);
 
         user.examplesSolved += examplesSolved || 0;
         user.levelsCompleted += levelsCompleted || 0;
@@ -145,7 +143,6 @@ router.post('/update-statistics', verifyToken, async (req, res) => {
         }
 
         await user.save();
-        console.log("Статистика обновлена:", user); // Логируем обновленные значения
         res.json({ message: 'Статистика обновлена' });
     } catch (error) {
         console.error("Ошибка при обновлении статистики:", error);
