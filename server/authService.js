@@ -8,7 +8,6 @@ const path = require('path');
 const router = express.Router();
 const secretKey = 'yourSecretKey';
 
-// Конфигурация multer для загрузки файлов
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'uploads/');
@@ -20,7 +19,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Middleware для проверки токена
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     if (!authHeader) {
@@ -37,7 +35,6 @@ const verifyToken = (req, res, next) => {
     });
 };
 
-// Регистрация нового пользователя
 router.post('/register', async (req, res) => {
     const { firstName, lastName, birthDate, username, password } = req.body;
 
@@ -62,7 +59,6 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Аутентификация пользователя
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
@@ -84,7 +80,6 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Получение профиля пользователя
 router.get('/profile', verifyToken, async (req, res) => {
     try {
         const user = await User.findById(req.userId);
@@ -110,7 +105,6 @@ router.get('/profile', verifyToken, async (req, res) => {
     }
 });
 
-// Загрузка аватара
 router.post('/upload-avatar', verifyToken, upload.single('avatar'), async (req, res) => {
     try {
         const avatarUrl = `http://localhost:5000/uploads/${req.file.filename}`;
@@ -122,8 +116,6 @@ router.post('/upload-avatar', verifyToken, upload.single('avatar'), async (req, 
     }
 });
 
-// Обновление статистики пользователя
-// Обновление статистики пользователя
 router.post('/update-statistics', verifyToken, async (req, res) => {
     const { examplesSolved, levelsCompleted, perfectScores, levelTime } = req.body;
 
