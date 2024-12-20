@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('./models/User');
+const Achievement = require('./models/Achievement');
 const multer = require('multer');
 const path = require('path');
 
@@ -141,6 +142,43 @@ router.post('/update-statistics', verifyToken, async (req, res) => {
         res.status(500).json({ message: 'Ошибка обновления статистики' });
     }
 });
+
+router.get('/check-achievements', async (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ message: 'Токен отсутствует' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, secretKey);
+        const user = await User.findById(decoded.id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'Пользователь не найден' });
+        }
+
+        const achievements = await Achievement.find({});
+        const unlockedAchievements = achievements.filter((achievement) => {
+            switch (achievement.title) {
+                case "Скоростной ум!":
+                    return user.bestTime !== null && user.bestTime <= 60;
+                case "Отличник":
+                    return user.perfectScores >= 1;
+                case "Первое решение!":
+                    return user.examplesSolved >= 1;
+                default:
+                    return false;
+            }
+        });
+
+        res.json({ achievements: unlockedAchievements });
+    } catch (error) {
+        console.error("Ошибка сервера:", error);
+        res.status(500).json({ message: 'Ошибка проверки достижений' });
+    }
+});
+
 
 
 module.exports = router;

@@ -12,6 +12,7 @@ const UserSchema = new mongoose.Schema({
     bestTime: { type: Number, default: null },
     avatarUrl: String,
     registrationDate: { type: Date, default: Date.now },
+    achievements: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Achievement' }],
 });
 
 module.exports = mongoose.model('User', UserSchema);
