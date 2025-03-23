@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 
 const generateExample = (numbers, operations) => {
-    let example = `${numbers[0]}`;
+    let exampleParts = [];
     let answer = numbers[0];
+    let stack = [numbers[0].toString()];
 
     for (let i = 1; i < numbers.length; i++) {
         let operation = operations[Math.floor(Math.random() * operations.length)];
@@ -21,20 +22,26 @@ const generateExample = (numbers, operations) => {
         } else if (operation === '-') {
             answer -= currentNum;
         } else if (operation === '^') {
-        currentNum = Math.floor(Math.random() * 6); // Ограничение степени от 0 до 5
-        answer = Math.pow(answer, currentNum);
+            currentNum = Math.floor(Math.random() * 6);
+            answer = Math.pow(answer, currentNum);
         } else if (operation === '√') {
-            // 256, 289, 324, 361, 400, 441, 484, 529, 576, 625, 676, 729, 784, 841, 961, 1089, 1156, 1225, 1296, 1369, 1444, 1521, 1681, 1764, 1849, 1936, 2116, 2209, 2304, 2401,
             const perfectSquares = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144, 169, 196, 225, 900, 1024, 1600, 2025, 2500];
             currentNum = perfectSquares[Math.floor(Math.random() * perfectSquares.length)];
-            example = `√${currentNum}`;
+            stack = [`√${currentNum}`];
             answer = Math.sqrt(currentNum);
             continue;
         }
-        example += ` ${operation} ${currentNum}`;
+
+        // Решаем, ставить ли скобки
+        if (Math.random() > 0.5 && i < numbers.length - 1) {
+            stack.unshift('(');
+            stack.push(`${operation} ${currentNum})`);
+        } else {
+            stack.push(`${operation} ${currentNum}`);
+        }
     }
 
-    return { example, answer };
+    return { example: stack.join(' '), answer };
 };
 
 router.get('/generate', (req, res) => {
@@ -93,4 +100,5 @@ router.get('/generate-log', (req, res) => {
         answer
     });
 });
+
 module.exports = router;
