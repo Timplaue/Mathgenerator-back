@@ -179,6 +179,21 @@ router.get('/check-achievements', async (req, res) => {
     }
 });
 
+router.get('/user', verifyToken, async (req, res) => {
+    try {
+        // Ищем пользователя в базе данных по ID, который мы получили из токена
+        const user = await User.findById(req.userId).select('birthDate');  // Запрашиваем только дату рождения
+        if (!user) {
+            return res.status(404).json({ message: 'Пользователь не найден' });
+        }
+
+        // Отправляем ответ с датой рождения пользователя
+        res.json({ birthDate: user.birthDate });
+    } catch (error) {
+        console.error("Ошибка при получении данных пользователя:", error.message);
+        res.status(500).json({ message: 'Ошибка при получении данных пользователя' });
+    }
+});
 
 
 module.exports = router;
