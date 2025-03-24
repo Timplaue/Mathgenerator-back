@@ -88,17 +88,49 @@ router.get('/generate-quadratic', (req, res) => {
 });
 
 router.get('/generate-log', (req, res) => {
-    const base = Math.floor(Math.random() * 9) + 2; // Основание от 2 до 10
-    const exponent = Math.floor(Math.random() * 4) + 1; // Степень от 1 до 4
-    const value = Math.pow(base, exponent); // Значение как степень основания
+    const operations = req.query.operations ? req.query.operations.split(',') : ['+', '-'];
 
-    const example = `log_${base}(${value})`;
-    const answer = Math.log(value) / Math.log(base);
+    const base1 = Math.floor(Math.random() * 9) + 2; // случайное основание логарифма (2-10)
+    const base2 = Math.floor(Math.random() * 9) + 2;
 
-    res.json({
-        example,
-        answer
-    });
+    const exponent1 = Math.floor(Math.random() * 4) + 1;
+    const exponent2 = Math.floor(Math.random() * 4) + 1;
+
+    const num1 = Math.pow(base1, exponent1);
+    const num2 = Math.pow(base2, exponent2);
+
+    let expression;
+    let answer;
+
+    const operation = operations[Math.floor(Math.random() * operations.length)];
+
+    switch (operation) {
+        case '+':
+            expression = `log_${base1}(${num1}) + log_${base1}(${num2})`;
+            answer = exponent1 + exponent2; // log_a(A) + log_a(B) = log_a(A*B)
+            break;
+        case '-':
+            expression = `log_${base1}(${num1}) - log_${base1}(${num2})`;
+            answer = exponent1 - exponent2; // log_a(A) - log_a(B) = log_a(A/B)
+            break;
+        case '*':
+            expression = `log_${base1}(${num1}) * log_${base2}(${num2})`;
+            answer = (Math.log(num1) / Math.log(base1)) * (Math.log(num2) / Math.log(base2));
+            break;
+        case '/':
+            expression = `log_${base1}(${num1}) / log_${base2}(${num2})`;
+            answer = (Math.log(num1) / Math.log(base1)) / (Math.log(num2) / Math.log(base2));
+            break;
+        case 'log_change_base':
+            expression = `log_${base1}(${num1}) в другой системе log_${base2}`;
+            answer = (Math.log(num1) / Math.log(base1)) / (Math.log(base2) / Math.log(base1));
+            break;
+        default:
+            expression = `log_${base1}(${num1}) + log_${base1}(${num2})`;
+            answer = exponent1 + exponent2;
+    }
+
+    res.json({ example: expression, answer });
 });
 
 module.exports = router;
