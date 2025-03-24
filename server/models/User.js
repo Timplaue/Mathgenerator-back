@@ -10,7 +10,7 @@ const UserSchema = new mongoose.Schema({
     levelsCompleted: { type: Number, default: 0 },
     perfectScores: { type: Number, default: 0 },
     bestTime: { type: Number, default: null },
-    avatarUrl: String,
+    avatarUrl: { type: String, default: "/images/logo.svg" },
     registrationDate: { type: Date, default: Date.now },
     achievements: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Achievement' }],
 });
