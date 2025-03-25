@@ -32,7 +32,6 @@ const generateExample = (numbers, operations) => {
             continue;
         }
 
-        // Решаем, ставить ли скобки
         if (Math.random() > 0.5 && i < numbers.length - 1) {
             stack.unshift('(');
             stack.push(`${operation} ${currentNum})`);
@@ -79,7 +78,7 @@ router.get('/generate-quadratic', (req, res) => {
     const b = -a * (x1 + x2);
     const c = a * x1 * x2;
 
-    const example = `${a}x² ${b >= 0 ? '+' : ''} ${b}x ${c >= 0 ? '+' : ''} ${c} = 0`;
+    const example = `${a}х² ${b >= 0 ? '+' : ''} ${b}х ${c >= 0 ? '+' : ''} ${c} = 0`;
 
     res.json({
         example,
